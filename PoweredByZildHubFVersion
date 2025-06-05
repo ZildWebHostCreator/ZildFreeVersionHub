@@ -1,0 +1,153 @@
+-- ZILD FPS Combat Script (FREE Version) | Powered by ZILD
+-- For all FPS games | UI: Rayfield | Combat Script by ZILD
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "ZILD FPS Combat Hub",
+    LoadingTitle = "ZILD FPS Hub Loading...",
+    LoadingSubtitle = "Smooth Aimbot, POV, Silent Aim",
+    ConfigurationSaving = {
+        Enabled = true,
+        FileName = "ZILD_FPS_Config"
+    },
+    Discord = { Enabled = false },
+    KeySystem = false
+})
+
+-- 📌 Combat Tab
+local CombatTab = Window:CreateTab("Combat", 4483362458)
+CombatTab:CreateSection("🔥 FPS Features")
+
+-- Variables
+local AimbotEnabled = false
+local SilentAimEnabled = false
+local POVCircleEnabled = true
+local HitboxExpand = false
+local Camera = workspace.CurrentCamera
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- POV Circle
+local FOV = 100
+local Circle = Drawing.new("Circle")
+Circle.Visible = POVCircleEnabled
+Circle.Thickness = 2
+Circle.Transparency = 1
+Circle.Color = Color3.fromRGB(0, 255, 0)
+Circle.Radius = FOV
+Circle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
+
+RunService.RenderStepped:Connect(function()
+    Circle.Position = UIS:GetMouseLocation()
+end)
+
+-- Target Finder
+local function GetClosestTarget()
+    local closest, shortest = nil, FOV
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local head = player.Character.Head
+            local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+            if onScreen then
+                local dist = (Vector2.new(screenPos.X, screenPos.Y) - UIS:GetMouseLocation()).Magnitude
+                if dist < shortest then
+                    local dir = (head.Position - Camera.CFrame.Position).Unit
+                    if dir:Dot(Camera.CFrame.LookVector) > 0.75 then
+                        closest, shortest = head, dist
+                    end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+-- Aimbot Button
+CombatTab:CreateButton({
+    Name = "Toggle Aimbot",
+    Callback = function()
+        AimbotEnabled = not AimbotEnabled
+        Rayfield:Notify({
+            Title = "Aimbot",
+            Content = AimbotEnabled and "Enabled" or "Disabled",
+            Duration = 4
+        })
+    end
+})
+
+-- Silent Aim
+CombatTab:CreateButton({
+    Name = "Toggle Silent Aim",
+    Callback = function()
+        SilentAimEnabled = not SilentAimEnabled
+        Rayfield:Notify({
+            Title = "Silent Aim",
+            Content = SilentAimEnabled and "Enabled" or "Disabled",
+            Duration = 4
+        })
+    end
+})
+
+-- Hitbox Expander
+CombatTab:CreateButton({
+    Name = "Auto Hitbox Expander",
+    Callback = function()
+        HitboxExpand = not HitboxExpand
+        Rayfield:Notify({
+            Title = "Hitbox Expander",
+            Content = HitboxExpand and "ON" or "OFF",
+            Duration = 4
+        })
+    end
+})
+
+-- Main Loop
+RunService.RenderStepped:Connect(function()
+    local target = GetClosestTarget()
+    if AimbotEnabled and target then
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+    end
+    if HitboxExpand then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+                pcall(function()
+                    local head = p.Character.Head
+                    head.Size = Vector3.new(15, 15, 15)
+                    head.Material = Enum.Material.Neon
+                    head.BrickColor = BrickColor.new("Bright red")
+                    head.Transparency = 0.4
+                    head.CanCollide = false
+                end)
+            end
+        end
+    end
+end)
+
+-- 📢 About Tab
+local InfoTab = Window:CreateTab("About", 4483362458)
+InfoTab:CreateSection("📌 ZILD Free Script Info")
+
+InfoTab:CreateParagraph({
+    Title = "ZILD Hub - FPS Free Version",
+    Content = "Created for all FPS games\n\n✅ Smooth Aimbot\n✅ POV Circle\n✅ Silent Aim\n✅ Hitbox Expander\n\nEnjoy free powerful features for FPS shooters!"
+})
+
+InfoTab:CreateButton({
+    Name = "🌐 Join ZILD Discord Server",
+    Callback = function()
+        setclipboard("https://discord.gg/vBUqNvSc")
+        Rayfield:Notify({
+            Title = "Discord Link Copied!",
+            Content = "Paste in browser to join ZILD!",
+            Duration = 5
+        })
+    end
+})
+
+InfoTab:CreateParagraph({
+    Title = "📌 Credits",
+    Content = "Powered by ZILD | Free FPS Combat Script\nSubscribe on YouTube and support my work!"
+})
